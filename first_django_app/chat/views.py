@@ -3,6 +3,7 @@ from .models import Chat, Message
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 # Create your views here.
 @login_required(login_url='/login/')
@@ -25,3 +26,12 @@ def login_view(request):
         else: 
            return render(request, 'auth/login.html', {'wrongPassword': True, 'redirect': redirect})
     return render (request, 'auth/login.html', {'redirect': redirect})
+
+def register (request):
+    redirect = request.GET.get('next')
+    if request.method =='POST': 
+        user = User.objects.create_user(username=request.POST.get('username'),
+                                 password=request.POST.get('password'))
+        user.save()
+    return render (request, 'register/register.html', {'redirect': redirect})
+        

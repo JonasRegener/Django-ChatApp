@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1> Registrierung </h1>
+<form method="POST" action="/register/">
+
+{% csrf_token %}
+
+    <input type="hidden" name="redirect" value="{{ redirect }}">
+<div> <input name="username" type="text"></div>
+<div> <input name="password" type="password"></div>
+<div> <button> register </button></div>
+</form>
+{% endblock %}
