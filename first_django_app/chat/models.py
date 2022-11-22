@@ -1,7 +1,7 @@
 from django.db import models
-from django.db.models.fields import DateField
 from datetime import date
 from django.conf import settings
+
 
 
 class Chat(models.Model):    
@@ -14,4 +14,6 @@ class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='chat_message_set', default=None, blank=True, null=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author_message_set')
     revciever = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='revciever_message_set')
+
+
     

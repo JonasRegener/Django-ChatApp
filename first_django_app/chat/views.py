@@ -4,18 +4,33 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-
+from django.http import JsonResponse
+from django.core import serializers
+from django.shortcuts import  render, redirect
+from django.contrib import messages
+from django.shortcuts import  render, redirect
+from .forms import NewUserForm
+from django.contrib.auth import login
+from django.contrib import messages
 # Create your views here.
 @login_required(login_url='/login/')
 def index(request):
+        """
+        This is a view to render the html. 
+        """
         if request.method =='POST': 
             print("Recieved data: " + request.POST['textmessage'])
             myChat = Chat.objects.get(id=1)
-            Message.objects.create(text=request.POST['textmessage'], chat=myChat, author=request.user, revciever=request.user)
+            new_message = Message.objects.create(text=request.POST['textmessage'], chat=myChat, author=request.user, revciever=request.user)
+            serialized_object = serializers.serialize('json', [new_message, ])
+            return JsonResponse(serialized_object[1:-1], safe=False)
         chatMessages = Message.objects.filter(chat__id=1)
         return  render(request, 'chat/index.html', {'messages': chatMessages })
 
 def login_view(request):
+    """
+    This is a view to render the html. 
+    """
     redirect = request.GET.get('next')
     if request.method =='POST': 
         user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
@@ -27,11 +42,15 @@ def login_view(request):
            return render(request, 'auth/login.html', {'wrongPassword': True, 'redirect': redirect})
     return render (request, 'auth/login.html', {'redirect': redirect})
 
-def register (request):
-    redirect = request.GET.get('next')
-    if request.method =='POST': 
-        user = User.objects.create_user(username=request.POST.get('username'),
-                                 password=request.POST.get('password'))
-        user.save()
-    return render (request, 'register/register.html', {'redirect': redirect})
-        
+def register(request):
+    
+	if request.method == "POST":
+		form = NewUserForm(request.POST)
+		if form.is_valid():
+			user = form.save()
+			login(request, user)
+			messages.success(request, "Registration successful." )
+			return redirect("main:homepage")
+		messages.error(request, "Unsuccessful registration. Invalid information.")
+	form = NewUserForm()
+	return render (request=request, template_name="register/register.html", context={"register_form":form})
